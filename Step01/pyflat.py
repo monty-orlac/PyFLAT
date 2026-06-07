@@ -1,5 +1,3 @@
-"""PyFLAT step.1 : 2次元トラス要素の線形静解析プログラム"""
-import typing
 import dataclasses
 import numpy as np
 import numpy.typing as npt
@@ -81,7 +79,7 @@ def calc_result_truss(coords: MatrixType, young: float, area: float, ans_elem: V
     return [np.array([stress, ]), ]
 
 
-def assemble_matrix(matrix_global: MatrixType, lm: typing.Sequence[int], matrix_local: MatrixType) -> None:
+def assemble_matrix(matrix_global: MatrixType, lm: list[int], matrix_local: MatrixType) -> None:
     # 要素剛性行列のサイズは自由度数（=lmの長さ）と一致するはず
     assert matrix_local.shape == (len(lm), len(lm))
 

@@ -70,7 +70,7 @@ class IBuilder(metaclass=abc.ABCMeta):
     def add_value(self, i: int, j: int, value: float) -> None:
         ...
 
-    def assemble(self, lm: typing.Sequence[int], matrix_local: MatrixType) -> None:
+    def assemble(self, lm: list[int], matrix_local: MatrixType) -> None:
         assert matrix_local.shape == (len(lm), len(lm))
 
         for il, _ig in enumerate(lm):
@@ -96,7 +96,7 @@ class IShape(metaclass=abc.ABCMeta):
     __slots__ = []
 
     @abc.abstractmethod
-    def assemble(self, lm: typing.Sequence[int]) -> None:
+    def assemble(self, lm: list[int]) -> None:
         pass
 
     @abc.abstractmethod
@@ -180,7 +180,7 @@ class ScipyDenseShape(IShape):
         self.__nsize: int = nsize
         return
 
-    def assemble(self, lm: typing.Sequence[int]) -> None:
+    def assemble(self, lm: list[int]) -> None:
         return
 
     def allocate(self) -> IBuilder:

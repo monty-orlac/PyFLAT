@@ -4,6 +4,7 @@ import numpy.typing as npt
 import scipy.linalg
 import scipy.sparse
 import abc
+import collections.abc as cabc
 
 # Numpy型ヒントのエイリアスを作成
 # 便宜上MatrixTypeとVectorTypeに分けたが、内部的な取り扱いは一緒
@@ -78,7 +79,7 @@ class IBuilder(metaclass=abc.ABCMeta):
     def add_value(self, i: int, j: int, value: float) -> None:
         ...
 
-    def assemble(self, lm: typing.Sequence[int], matrix_local: MatrixType) -> None:
+    def assemble(self, lm: cabc.Sequence[int], matrix_local: MatrixType) -> None:
         assert matrix_local.shape == (len(lm), len(lm))
 
         for il, _ig in enumerate(lm):
@@ -106,7 +107,7 @@ class IShape(metaclass=abc.ABCMeta):
     TYPE: typing.ClassVar[str]
 
     @abc.abstractmethod
-    def assemble(self, lm: typing.Sequence[int]) -> None:
+    def assemble(self, lm: cabc.Sequence[int]) -> None:
         pass
 
     @abc.abstractmethod
@@ -197,7 +198,7 @@ class ScipyDenseShape(IShape):
         self.__nsize: int = nsize
         return
 
-    def assemble(self, lm: typing.Sequence[int]) -> None:
+    def assemble(self, lm: cabc.Sequence[int]) -> None:
         return
 
     def allocate(self) -> IBuilder:
@@ -307,7 +308,7 @@ class ScipyDirectShape(IShape):
         self.__ntriplet_nodiag: int = nsize
         return
 
-    def assemble(self, lm: typing.Sequence[int]) -> None:
+    def assemble(self, lm: cabc.Sequence[int]) -> None:
         nloc: int = len(lm)
         self.__ntriplet_nodiag += nloc * (nloc - 1)
         return
