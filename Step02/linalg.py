@@ -32,11 +32,11 @@ class IFactorized(metaclass=abc.ABCMeta):
     @property
     @abc.abstractmethod
     def size(self) -> int:
-        pass
+        ...
 
     @abc.abstractmethod
     def solve(self, rhs: VectorType) -> VectorType:
-        pass
+        ...
 
 
 # **********************************************************
@@ -97,11 +97,11 @@ class IShape(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def assemble(self, lm: list[int]) -> None:
-        pass
+        ...
 
     @abc.abstractmethod
     def allocate(self) -> IBuilder:
-        pass
+        ...
 
     @classmethod
     @abc.abstractmethod

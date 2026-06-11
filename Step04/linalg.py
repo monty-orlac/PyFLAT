@@ -34,11 +34,11 @@ class IFactorized(metaclass=abc.ABCMeta):
     @property
     @abc.abstractmethod
     def size(self) -> int:
-        pass
+        ...
 
     @abc.abstractmethod
     def solve(self, rhs: VectorType) -> VectorType:
-        pass
+        ...
 
 
 # **********************************************************
@@ -101,11 +101,11 @@ class IShape(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def assemble(self, lm: cabc.Sequence[int]) -> None:
-        pass
+        ...
 
     @abc.abstractmethod
     def allocate(self) -> IBuilder:
-        pass
+        ...
 
     @classmethod
     @abc.abstractmethod
@@ -288,11 +288,11 @@ class ScipyDirectShape(IShape):
 
     def __init__(self, nsize: int):
         self.__nsize: int = nsize
-        self.__ntriplet_nodiag: int = nsize
+        self.__ntriplet_nodiag: int = 0
         return
 
     def assemble(self, lm: cabc.Sequence[int]) -> None:
-        nloc: int = len(lm)
+        nloc: int = sum(v >= 0 for v in lm)
         self.__ntriplet_nodiag += nloc * (nloc - 1)
         return
 
