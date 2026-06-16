@@ -107,27 +107,11 @@ class ElementBase(metaclass=abc.ABCMeta):
 
     # 要素の自由度番号リスト（lm）を [節点0のx, 節点0のy, 節点1のx, 節点1のy] の順で返す
     def get_lm(self) -> cabc.Sequence[int]:
-        return self._get_lm_by_nodes()
+        return [dof for node in self._nodes for dof in node.dof]
 
     # 構成節点の座標を行列にまとめて返す（1行が1節点の [x, y]）
     def get_coord_matrix(self) -> MatrixType:
-        return self._get_coord_matrix_by_nodes()
-
-    def get_lm_edge(self, iedge: int) -> cabc.Sequence[int]:
-        return self._get_lm_by_nodes(lib.get_element_edge_ids(self.NNODE, iedge))
-
-    def get_coord_matrix_edge(self, iedge: int) -> MatrixType:
-        return self._get_coord_matrix_by_nodes(lib.get_element_edge_ids(self.NNODE, iedge))
-
-    def _get_lm_by_nodes(self, ellabels: cabc.Iterable[int] | None = None) -> cabc.Sequence[int]:
-        if ellabels is None:
-            ellabels = range(len(self._nodes))
-        return [dof for i in ellabels for dof in self._nodes[i].dof]
-
-    def _get_coord_matrix_by_nodes(self, ellabels: cabc.Iterable[int] | None = None) -> MatrixType:
-        if ellabels is None:
-            ellabels = range(len(self._nodes))
-        coords: MatrixType = np.vstack([self._nodes[i].coord for i in ellabels], )
+        coords: MatrixType = np.vstack([node.coord for node in self._nodes], )
         return coords
 
     @abc.abstractmethod
@@ -140,6 +124,12 @@ class ElementBase(metaclass=abc.ABCMeta):
 
 
 class IElementEdge(metaclass=abc.ABCMeta):
+    NNODE: typing.ClassVar[int]
+
+    @classmethod
+    def _get_edge_ids(cls, iedge: int) -> cabc.Sequence[int]:
+        return lib.get_element_edge_ids(cls.NNODE, iedge)
+
     @abc.abstractmethod
     def calc_edge_load(self, iedge: int, value: float, direction: tuple[float, float] | None = None) -> VectorType:
         ...
@@ -197,7 +187,8 @@ class ElementPETRIA3(ElementBase, IElementEdge):
     def calc_edge_load(self, iedge: int, value: float, direction: tuple[float, float] | None = None) -> VectorType:
         assert isinstance(self._prop, IPropertyPE)
         load: VectorType = lib.calc_edge_plane2d(
-            self.get_coord_matrix_edge(iedge),
+            self.get_coord_matrix(),
+            self._get_edge_ids(iedge),
             self._prop.get_thickness(),
             value, direction)
         return load
@@ -230,7 +221,8 @@ class ElementPEQUAD4(ElementBase, IElementEdge):
     def calc_edge_load(self, iedge: int, value: float, direction: tuple[float, float] | None = None) -> VectorType:
         assert isinstance(self._prop, IPropertyPE)
         load: VectorType = lib.calc_edge_plane2d(
-            self.get_coord_matrix_edge(iedge),
+            self.get_coord_matrix(),
+            self._get_edge_ids(iedge),
             self._prop.get_thickness(),
             value, direction)
         return load
@@ -263,7 +255,8 @@ class ElementPETRIA6(ElementBase, IElementEdge):
     def calc_edge_load(self, iedge: int, value: float, direction: tuple[float, float] | None = None) -> VectorType:
         assert isinstance(self._prop, IPropertyPE)
         load: VectorType = lib.calc_edge_plane2d(
-            self.get_coord_matrix_edge(iedge),
+            self.get_coord_matrix(),
+            self._get_edge_ids(iedge),
             self._prop.get_thickness(),
             value, direction)
         return load
@@ -334,7 +327,7 @@ class EdgeLoad(ConditionLoad):
     def apply(self, rhs: VectorType) -> None:
         assert isinstance(self.__elem, IElementEdge)
         load: VectorType = self.__elem.calc_edge_load(self.__iedge, self.__value, self.__direction)
-        lm: cabc.Sequence[int] = self.__elem.get_lm_edge(self.__iedge)
+        lm: cabc.Sequence[int] = self.__elem.get_lm()
         for il, ig in enumerate(lm):
             if ig < 0:
                 continue

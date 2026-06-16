@@ -160,11 +160,17 @@ def _shape_derivs_1d(nedge: int, xi: float) -> VectorType:
     raise AssertionError(f"Unknown nedge={nedge}")
 
 
-def calc_edge_plane2d(coords: MatrixType, thickness: float, value: float, direction: tuple[float, float] | None = None) -> VectorType:
+def calc_edge_plane2d(
+        coords: MatrixType, ellabels: cabc.Sequence[int],
+        thickness: float,
+        value: float, direction: tuple[float, float] | None = None
+        ) -> VectorType:
 
     # 等価節点外力ベクトル
-    nedge: int = coords.shape[0]
-    ret: VectorType = np.zeros(nedge * 2)
+    nnode: int = coords.shape[0]
+    nedge: int = len(ellabels)
+    ret: VectorType = np.zeros(nnode * 2)
+    edge_coords: MatrixType = np.vstack([coords[i, :] for i in ellabels], )
 
     # Gauss積分点ごとにループを回す
     for xi, weight in _gauss_info_1d(nedge):
@@ -177,7 +183,7 @@ def calc_edge_plane2d(coords: MatrixType, thickness: float, value: float, direct
 
         # ヤコビアンの計算 (エッジの接線ベクトル)
         # dx/dxi = Σ (dNi/dxi * xi), dy/dxi = Σ (dNi/dxi * yi)
-        jac: VectorType = dslocal @ coords
+        jac: VectorType = dslocal @ edge_coords
         jdet: float = float(np.linalg.norm(jac, ord=2))
 
         # 法線ベクトルの算出 (エッジに垂直な方向)
@@ -192,7 +198,7 @@ def calc_edge_plane2d(coords: MatrixType, thickness: float, value: float, direct
 
         # 外力の加算
         # 各節点jに対して f_x = N_j * p * nx, f_y = N_j * p * ny
-        for i in range(nedge):
+        for i in ellabels:
             ret[2 * i + 0] += weight * slocal[i] * (value * norm_vector[0]) * jdet * thickness
             ret[2 * i + 1] += weight * slocal[i] * (value * norm_vector[1]) * jdet * thickness
     return ret
