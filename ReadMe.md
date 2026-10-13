@@ -2,7 +2,7 @@
 
 [Zenn にて公開中の「Python で学ぶ有限要素法」](https://zenn.dev/monty/articles/adcc984d5233c3) で紹介している有限要素法のサンプルコードです。Step.1 ～ Step.7 に分けて、教育用の2次元有限要素法コードを少しずつ整理・機能拡張しています。
 
-[シリーズ各記事の案内はこちら](https://zenn.dev/monty/articles/adcc984d5233c3) にまとまっています。また、各記事には下記からアクセスすることもできます。
+各記事には下記からアクセスすることもできます。
 
 - [第1回 トラス解析とアセンブリの仕組み](https://zenn.dev/monty/articles/f2d053cfdcc2da)
 - [第2回 オブジェクト指向によるソルバーと要素の整理](https://zenn.dev/monty/articles/db117a60d8ec55)
